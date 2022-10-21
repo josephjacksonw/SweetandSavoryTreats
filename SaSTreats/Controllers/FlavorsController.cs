@@ -1,17 +1,24 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 using SaSTreats.Models;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
+using System.Threading.Tasks;
+using System.Security.Claims;
 
 namespace SaSTreats.Controllers
 {
   public class FlavorsController : Controller
   {
     private readonly SaSTreatsContext _db;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public FlavorsController(SaSTreatsContext db)
+    public FlavorsController(UserManager<ApplicationUser> userManager, SaSTreatsContext db)
     {
+      _userManager = userManager;
       _db = db;
     }
 
@@ -21,6 +28,7 @@ namespace SaSTreats.Controllers
       return View(model);
     }
 
+    [Authorize]
     public ActionResult Create()
     {
       return View();
@@ -34,6 +42,8 @@ namespace SaSTreats.Controllers
       return RedirectToAction("Index");
     }
 
+
+
     public ActionResult Details(int id)
     {
       var thisFlavor = _db.Flavors
@@ -42,6 +52,8 @@ namespace SaSTreats.Controllers
           .FirstOrDefault(flavor => flavor.FlavorId == id);
       return View(thisFlavor);
     }
+
+    [Authorize]
     public ActionResult Edit(int id)
     {
       var thisFlavor = _db.Flavors.FirstOrDefault(flavor => flavor.FlavorId == id);
@@ -56,6 +68,7 @@ namespace SaSTreats.Controllers
       return RedirectToAction("Index");
     }
 
+    [Authorize]
     public ActionResult Delete(int id)
     {
       var thisFlavor = _db.Flavors.FirstOrDefault(flavor => flavor.FlavorId == id);

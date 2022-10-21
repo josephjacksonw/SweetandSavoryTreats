@@ -3,24 +3,24 @@
 }
 
 @using SaSTreats.Models;
-@model IEnumerable<SaSTreats.Models.Item>
+@model IEnumerable<SaSTreats.Models.Treat>
 
-<h1>Items for @User.Identity.Name</h1>
+<h1>Treats for @User.Identity.Name</h1>
 
 @if (Model.Any())
 {
   <ul>
-    @foreach (Item item in Model)
+    @foreach (Treat treat in Model)
     {
-      <li>@Html.ActionLink($"{item.Description}", "Details", new { id = item.ItemId })</li>
+      <li>@Html.ActionLink($"{treat.Description}", "Details", new { id = treat.TreatId })</li>
     }
   </ul>
 } 
 else
 {
-  <h3>No items have been added yet!</h3>
+  <h3>No treats have been added yet!</h3>
 }
 
-<p>@Html.ActionLink("Add new item", "Create")</p>
+<p>@Html.ActionLink("Add new treat", "Create")</p>
 
 <p>@Html.ActionLink("Home", "Index", "Home")</p>

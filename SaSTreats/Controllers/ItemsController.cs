@@ -12,12 +12,12 @@ using System.Security.Claims;
 namespace SaSTreats.Controllers
 {
   [Authorize]
-  public class ItemsController : Controller
+  public class TreatsController : Controller
   {
     private readonly SaSTreatsContext _db;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public ItemsController(UserManager<ApplicationUser> userManager, SaSTreatsContext db)
+    public TreatsController(UserManager<ApplicationUser> userManager, SaSTreatsContext db)
     {
       _userManager = userManager;
       _db = db;
@@ -27,27 +27,27 @@ namespace SaSTreats.Controllers
     {
         var userId = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var currentUser = await _userManager.FindByIdAsync(userId);
-        var userItems = _db.Items.Where(entry => entry.User.Id == currentUser.Id).ToList();
-        return View(userItems);
+        var userTreats = _db.Treats.Where(entry => entry.User.Id == currentUser.Id).ToList();
+        return View(userTreats);
     }
 
     public ActionResult Create()
     {
-      ViewBag.CategoryId = new SelectList(_db.Categories, "CategoryId", "Name");
+      ViewBag.FlavorId = new SelectList(_db.Flavors, "FlavorId", "Name");
       return View();
     }
 
     [HttpPost]
-    public async Task<ActionResult> Create(Item item, int CategoryId)
+    public async Task<ActionResult> Create(Treat treat, int FlavorId)
     {
         var userId = this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         var currentUser = await _userManager.FindByIdAsync(userId);
-        item.User = currentUser;
-        _db.Items.Add(item);
+        treat.User = currentUser;
+        _db.Treats.Add(treat);
         _db.SaveChanges();
-        if (CategoryId != 0)
+        if (FlavorId != 0)
         {
-            _db.CategoryItem.Add(new CategoryItem() { CategoryId = CategoryId, ItemId = item.ItemId });
+            _db.FlavorTreat.Add(new FlavorTreat() { FlavorId = FlavorId, TreatId = treat.TreatId });
         }
         _db.SaveChanges();
         return RedirectToAction("Index");
@@ -55,45 +55,45 @@ namespace SaSTreats.Controllers
 
     public ActionResult Details(int id)
     {
-      var thisItem = _db.Items
-          .Include(item => item.JoinEntities)
-          .ThenInclude(join => join.Category)
-          .FirstOrDefault(item => item.ItemId == id);
-      return View(thisItem);
+      var thisTreat = _db.Treats
+          .Include(treat => treat.JoinEntities)
+          .ThenInclude(join => join.Flavor)
+          .FirstOrDefault(treat => treat.TreatId == id);
+      return View(thisTreat);
     }
 
     public ActionResult Edit(int id)
     {
-      var thisItem = _db.Items.FirstOrDefault(item => item.ItemId == id);
-      ViewBag.CategoryId = new SelectList(_db.Categories, "CategoryId", "Name");
-      return View(thisItem);
+      var thisTreat = _db.Treats.FirstOrDefault(treat => treat.TreatId == id);
+      ViewBag.FlavorId = new SelectList(_db.Flavors, "FlavorId", "Name");
+      return View(thisTreat);
     }
 
     [HttpPost]
-    public ActionResult Edit(Item item, int CategoryId)
+    public ActionResult Edit(Treat treat, int FlavorId)
     {
-      if (CategoryId != 0)
+      if (FlavorId != 0)
       {
-        _db.CategoryItem.Add(new CategoryItem() { CategoryId = CategoryId, ItemId = item.ItemId });
+        _db.FlavorTreat.Add(new FlavorTreat() { FlavorId = FlavorId, TreatId = treat.TreatId });
       }
-      _db.Entry(item).State = EntityState.Modified;
+      _db.Entry(treat).State = EntityState.Modified;
       _db.SaveChanges();
       return RedirectToAction("Index");
     }
 
-    public ActionResult AddCategory(int id)
+    public ActionResult AddFlavor(int id)
     {
-      var thisItem = _db.Items.FirstOrDefault(item => item.ItemId == id);
-      ViewBag.CategoryId = new SelectList(_db.Categories, "CategoryId", "Name");
-      return View(thisItem);
+      var thisTreat = _db.Treats.FirstOrDefault(treat => treat.TreatId == id);
+      ViewBag.FlavorId = new SelectList(_db.Flavors, "FlavorId", "Name");
+      return View(thisTreat);
     }
 
     [HttpPost]
-    public ActionResult AddCategory(Item item, int CategoryId)
+    public ActionResult AddFlavor(Treat treat, int FlavorId)
     {
-      if (CategoryId != 0)
+      if (FlavorId != 0)
       {
-      _db.CategoryItem.Add(new CategoryItem() { CategoryId = CategoryId, ItemId = item.ItemId });
+      _db.FlavorTreat.Add(new FlavorTreat() { FlavorId = FlavorId, TreatId = treat.TreatId });
       }
       _db.SaveChanges();
       return RedirectToAction("Index");
@@ -101,24 +101,24 @@ namespace SaSTreats.Controllers
 
     public ActionResult Delete(int id)
     {
-      var thisItem = _db.Items.FirstOrDefault(item => item.ItemId == id);
-      return View(thisItem);
+      var thisTreat = _db.Treats.FirstOrDefault(treat => treat.TreatId == id);
+      return View(thisTreat);
     }
 
     [HttpPost, ActionName("Delete")]
     public ActionResult DeleteConfirmed(int id)
     {
-      var thisItem = _db.Items.FirstOrDefault(item => item.ItemId == id);
-      _db.Items.Remove(thisItem);
+      var thisTreat = _db.Treats.FirstOrDefault(treat => treat.TreatId == id);
+      _db.Treats.Remove(thisTreat);
       _db.SaveChanges();
       return RedirectToAction("Index");
     }
 
     [HttpPost]
-    public ActionResult DeleteCategory(int joinId)
+    public ActionResult DeleteFlavor(int joinId)
     {
-      var joinEntry = _db.CategoryItem.FirstOrDefault(entry => entry.CategoryItemId == joinId);
-      _db.CategoryItem.Remove(joinEntry);
+      var joinEntry = _db.FlavorTreat.FirstOrDefault(entry => entry.FlavorTreatId == joinId);
+      _db.FlavorTreat.Remove(joinEntry);
       _db.SaveChanges();
       return RedirectToAction("Index");
     }

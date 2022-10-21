@@ -70,12 +70,8 @@ namespace SaSTreats.Controllers
     }
 
     [HttpPost]
-    public ActionResult Edit(Treat treat, int FlavorId)
+    public ActionResult Edit(Treat treat)
     {
-      if (FlavorId != 0)
-      {
-        _db.FlavorTreat.Add(new FlavorTreat() { FlavorId = FlavorId, TreatId = treat.TreatId });
-      }
       _db.Entry(treat).State = EntityState.Modified;
       _db.SaveChanges();
       return RedirectToAction("Index");
@@ -91,6 +87,13 @@ namespace SaSTreats.Controllers
     [HttpPost]
     public ActionResult AddFlavor(Treat treat, int FlavorId)
     {
+      foreach(FlavorTreat entry in _db.FlavorTreat)
+      {
+        if(treat.TreatId == entry.TreatId && FlavorId == entry.FlavorId)
+        {
+          return RedirectToAction("index");
+        }
+      }
       if (FlavorId != 0)
       {
       _db.FlavorTreat.Add(new FlavorTreat() { FlavorId = FlavorId, TreatId = treat.TreatId });
